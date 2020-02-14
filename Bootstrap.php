@@ -206,8 +206,8 @@ final class Shopware_Plugins_Backend_SwagImportExport_Bootstrap extends Shopware
      */
     public function update($oldVersion)
     {
-        if (!$this->assertMinimumVersion('5.4.0')) {
-            throw new MinVersionException('This plugin requires Shopware 5.4.0 or a later version');
+        if (!$this->assertMinimumVersion('5.5.2')) {
+            throw new MinVersionException('This plugin requires Shopware 5.5.2 or a later version');
         }
 
         if (version_compare($oldVersion, '2.0.0', '<=')) {
@@ -452,7 +452,7 @@ final class Shopware_Plugins_Backend_SwagImportExport_Bootstrap extends Shopware
             $this->getDataTransformerFactory(),
             $this->get('swag_import_export.logger'),
             $this->get('swag_import_export.upload_path_provider'),
-            Shopware()->Auth(),
+            $this->get('auth'),
             $this->get('shopware_media.media_service')
         );
     }
@@ -469,7 +469,7 @@ final class Shopware_Plugins_Backend_SwagImportExport_Bootstrap extends Shopware
             $this->getDataTransformerFactory(),
             $this->get('swag_import_export.logger'),
             $this->get('swag_import_export.upload_path_provider'),
-            Shopware()->Auth(),
+            $this->get('auth'),
             $this->get('shopware_media.media_service')
         );
     }
@@ -760,7 +760,9 @@ final class Shopware_Plugins_Backend_SwagImportExport_Bootstrap extends Shopware
     {
         $importCronPath = Shopware()->DocPath() . 'files/import_cron/';
         if (!file_exists($importCronPath)) {
-            mkdir($importCronPath, 0777, true);
+            if (!mkdir($importCronPath, 0777, true) && !is_dir($importCronPath)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $importCronPath));
+            }
         }
 
         if (!file_exists($importCronPath . '.htaccess')) {
@@ -769,7 +771,9 @@ final class Shopware_Plugins_Backend_SwagImportExport_Bootstrap extends Shopware
 
         $importExportPath = Shopware()->DocPath() . 'files/import_export/';
         if (!file_exists($importExportPath)) {
-            mkdir($importExportPath, 0777, true);
+            if (!mkdir($importExportPath, 0777, true) && !is_dir($importExportPath)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $importExportPath));
+            }
         }
 
         if (!file_exists($importExportPath . '.htaccess')) {
